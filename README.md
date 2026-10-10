@@ -2,7 +2,7 @@
 
 Freelance digital marketer from India: Meta Ads (Facebook and Instagram), social media marketing and AI automation.
 
-**Live site:** https://harshpratapsingh.github.io
+**Live site:** https://harshmetaads.github.io
 
 ## What I do
 - Meta Ads campaign setup, targeting, Pixel and Conversions API tracking, creative testing, retargeting and scaling

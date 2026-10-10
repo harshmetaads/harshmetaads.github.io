@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://harshpratapsingh.github.io/sitemap.xml
+Sitemap: https://harshmetaads.github.io/sitemap.xml
