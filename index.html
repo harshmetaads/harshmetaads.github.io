@@ -460,6 +460,30 @@ footer p { margin: 12px 0 0; max-width: 32ch; }
   .rv, .split .wd { opacity: 1; translate: 0 0; transition: none; }
   .tilt, .gig img { transition: none; }
 }
+
+/* AI Employee project card */
+.project-pic { background: radial-gradient(ellipse at 50% 0%, rgba(47,125,255,.2), transparent 65%), #050a18; }
+.project-pic::before { background: radial-gradient(ellipse at 20% 20%, rgba(47,125,255,.2), transparent 45%), linear-gradient(135deg, #050a18, #0b1630 55%, #071020); filter: none; }
+.project-screen { position: relative; z-index: 1; height: 100%; padding: clamp(14px, 2vw, 24px); display: flex; flex-direction: column; justify-content: center; font-family: var(--font-mono); }
+.project-screen-top { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid rgba(104,180,255,.18); color: #9aa8cc; font-size: clamp(.48rem, 1vw, .68rem); letter-spacing: .08em; }
+.project-lights { display: inline-flex; gap: 4px; flex: none; }
+.project-lights i { width: 6px; height: 6px; border-radius: 50%; background: #4fd1ff; opacity: .8; }
+.project-lights i:first-child { background: #ff6f91; }
+.project-lights i:nth-child(2) { background: #ffd60a; }
+.project-live { margin-left: auto; padding: 4px 7px; border: 1px solid rgba(79,209,255,.3); border-radius: 5px; color: #4fd1ff; white-space: nowrap; font-size: .58rem; }
+.project-screen-body { display: grid; justify-items: center; gap: 8px; padding: clamp(12px, 2vw, 22px) 0 0; }
+.project-node { width: min(100%, 280px); padding: 10px 12px; display: grid; grid-template-columns: 28px 1fr; column-gap: 8px; align-items: center; border: 1px solid rgba(104,180,255,.28); border-radius: 10px; background: rgba(7,16,38,.84); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.project-node b { color: #eef3ff; font: 700 clamp(.65rem, 1.3vw, .82rem) var(--font-display); }
+.project-node small { grid-column: 2; color: #9aa8cc; font: 500 clamp(.52rem, 1vw, .64rem) var(--font-body); }
+.node-icon { grid-row: span 2; display: grid; place-items: center; width: 27px; height: 27px; border-radius: 7px; background: rgba(47,125,255,.18); color: #68b4ff; font-size: 1rem; }
+.project-connector { color: #4fd1ff; line-height: 1; }
+.project-branches { display: flex; gap: 7px; }
+.project-branches span { padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(104,180,255,.2); background: rgba(47,125,255,.08); color: #9aa8cc; font-size: .6rem; }
+.project-branches span:first-child { color: #63e6a5; border-color: rgba(99,230,165,.35); background: rgba(29,191,115,.08); }
+.project-node-wide { width: min(100%, 320px); }
+.project-tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 18px 0 22px; }
+.project-tags span { padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--blue-2); background: rgba(7,12,30,.6); font-size: .75rem; }
+
 </style>
 </head>
 <body>
@@ -634,6 +658,27 @@ footer p { margin: 12px 0 0; max-width: 32ch; }
           <h3>Scale the winners, cut the rest</h3>
           <p>Creative tests, retargeting funnels and weekly optimization that push your budget toward the ads that earn it.</p>
           <a class="btn primary" data-fiverr data-magnet href="https://www.fiverr.com/s/xrrwmkD" target="_blank" rel="noopener">See this gig <span class="arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="row rev">
+        <a class="pic project-pic tilt rv" data-px href="ai-employee.html" aria-label="Explore AI Employee for SMBs project">
+          <div class="project-screen">
+            <div class="project-screen-top"><span class="project-lights"><i></i><i></i><i></i></span><span>AI EMPLOYEE / WORKFLOW</span><span class="project-live">PROTOTYPE</span></div>
+            <div class="project-screen-body">
+              <div class="project-node"><span class="node-icon">↳</span><b>New enquiry</b><small>Webhook intake</small></div>
+              <div class="project-connector">↓</div>
+              <div class="project-node"><span class="node-icon">✳</span><b>Qualify lead</b><small>Score intent &amp; budget</small></div>
+              <div class="project-branches"><span>HOT</span><span>WARM</span><span>COLD</span></div>
+              <div class="project-node project-node-wide"><span class="node-icon">▤</span><b>CRM + follow-up</b><small>Google Sheets · Email alerts · Reminders</small></div>
+            </div>
+          </div>
+        </a>
+        <div class="rv">
+          <p class="eyebrow">AI automation · n8n</p>
+          <h3>AI Employee for SMBs</h3>
+          <p>An automation prototype that helps small businesses capture enquiries, qualify leads as HOT / WARM / COLD, save lead details to Google Sheets, and trigger sales alerts and follow-up reminders.</p>
+          <p class="project-tags"><span>n8n</span><span>Google Sheets CRM</span><span>Lead Scoring</span><span>Email Automation</span></p>
+          <a class="btn primary" data-magnet href="ai-employee.html">Explore project <span class="arrow">↗</span></a>
         </div>
       </div>
     </div>
