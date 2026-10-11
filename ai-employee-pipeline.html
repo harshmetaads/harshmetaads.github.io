@@ -1,0 +1,329 @@
+<title>AI Employee Pipeline | Harsh Pratap Singh</title>
+<link rel="canonical" href="https://harshmetaads.github.io/ai-employee-pipeline.html">
+<meta name="description" content="Prototype: an AI employee that reads a customer message, scores the lead, saves a CRM row and drafts an owner alert.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: left column = customer message input; right column = six-stage pipeline that fills in as the automation runs; sheet table below. */
+:root{
+  --bg:#F2F4F3; --surface:#FFFFFF; --ink:#13201D; --muted:#5B6B67; --line:#D9E0DD;
+  --accent:#0B6E5C; --accent-soft:#DDF0EB;
+  --hot:#C2410C; --hot-soft:#FDE9DF; --warm:#9A6700; --warm-soft:#FBF0D3; --cold:#4B5E6B; --cold-soft:#E5EBEF;
+  --chat-in:#EDEFEE; --chat-out:#D7F2DF;
+  --display:'Bricolage Grotesque',Georgia,serif; --body:'Instrument Sans',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1614; --surface:#16211E; --ink:#E7EFEC; --muted:#93A5A0; --line:#27372F;
+  --accent:#4FC3A6; --accent-soft:#17352E;
+  --hot:#FF8A5B; --hot-soft:#3A2018; --warm:#E8B84A; --warm-soft:#33290E; --cold:#9DB1BE; --cold-soft:#1E2A31;
+  --chat-in:#202C29; --chat-out:#1B3B2C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1614; --surface:#16211E; --ink:#E7EFEC; --muted:#93A5A0; --line:#27372F;
+  --accent:#4FC3A6; --accent-soft:#17352E;
+  --hot:#FF8A5B; --hot-soft:#3A2018; --warm:#E8B84A; --warm-soft:#33290E; --cold:#9DB1BE; --cold-soft:#1E2A31;
+  --chat-in:#202C29; --chat-out:#1B3B2C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:28px 56px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-family:var(--display);font-size:clamp(28px,5vw,40px);line-height:1.08;margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);max-width:62ch;margin:0 0 6px}
+.badge{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:4px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;margin-top:22px;align-items:start}
+@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.panel h2{font-family:var(--display);font-size:18px;margin:0 0 12px}
+label{display:block;font-size:12px;font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px}
+textarea{min-height:120px;resize:vertical}
+select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.field{margin-bottom:14px}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+input[type=email]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px}
+input[type=email]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-family:var(--body);font-size:13.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.chk input{margin-top:3px}
+.ok{color:var(--accent)}
+.run{width:100%;font:inherit;font-weight:600;font-size:15px;background:var(--accent);color:var(--bg);border:0;border-radius:6px;padding:12px;cursor:pointer}
+:root[data-theme="light"] .run{color:#fff}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .run{color:#fff}}
+.run:disabled{opacity:.55;cursor:default}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding-bottom:16px;position:relative;opacity:.38;transition:opacity .3s}
+.step.on,.step.done{opacity:1}
+.step:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:2px;width:1px;background:var(--line)}
+.ico{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-family:var(--mono);font-size:12px;background:var(--surface);color:var(--muted)}
+.step.on .ico{border-color:var(--accent);color:var(--accent)}
+.step.done .ico{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.step.on .ico{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px var(--accent-soft)}}
+@media(prefers-reduced-motion:reduce){.step.on .ico{animation:none}.step{transition:none}}
+.st{font-weight:600;margin:3px 0 2px}
+.who{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-left:6px;font-weight:400}
+.body{font-size:14px;min-width:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;font-size:13.5px;margin-top:6px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.msg{background:var(--chat-in);border-radius:10px;padding:8px 12px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:6px}
+.msg.out{background:var(--chat-out)}
+.msg.alert{border-left:3px solid var(--hot)}
+.pts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pt{font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:2px 7px}
+.cls{display:inline-block;font-family:var(--mono);font-weight:500;font-size:13px;padding:3px 10px;border-radius:4px;margin-top:6px}
+.cls.HOT{background:var(--hot-soft);color:var(--hot)} .cls.WARM{background:var(--warm-soft);color:var(--warm)} .cls.COLD{background:var(--cold-soft);color:var(--cold)}
+.err{color:var(--hot);font-size:13.5px;margin-top:8px}
+.sheet{margin-top:20px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--bg);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums}
+.empty{padding:16px;color:var(--muted);font-size:13.5px}
+.foot{margin-top:22px;font-size:13px;color:var(--muted);max-width:75ch}
+.foot b{color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <p class="note" style="margin:0 0 14px"><a href="ai-employee.html">← AI Employee project</a> · <a href="/">Portfolio</a> · <a href="https://github.com/harshmetaads/ai-employee---smbs" target="_blank" rel="noopener">Code on GitHub ↗</a></p>
+  <span class="badge">AI Employee for SMBs · live pipeline</span>
+  <h1>Ek customer message. Chhe kaam. Zero insaan.</h1>
+  <p class="sub">Customer ka message paste karo. AI use padhta hai, details nikalta hai, lead ko score karta hai, sheet mein row banata hai, owner ko alert likhta hai aur customer ko reply draft karta hai.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>1. Customer ka message</h2>
+      <div class="field">
+        <label for="biz">Business type</label>
+        <select id="biz"></select>
+      </div>
+      <label>Example messages</label>
+      <div class="presets" id="presets"></div>
+      <div class="field">
+        <label for="msg">Message (Hindi, English ya Hinglish)</label>
+        <textarea id="msg" placeholder="Customer ka message yahan paste karo"></textarea>
+      </div>
+      <div class="field live" hidden>
+        <label for="alertTo">Alert kis email par jaaye</label>
+        <input id="alertTo" type="email" placeholder="owner@example.com" autocomplete="off">
+        <label class="chk"><input type="checkbox" id="real" checked> Asli mein bhejo: Google Sheet mein row aur HOT par Gmail alert</label>
+        <p class="note" id="sheetLink"></p>
+      </div>
+      <button class="run" id="run">Run automation</button>
+      <p class="note" id="mode">Steps 2, 3 aur 6 mein AI asli mein chalta hai jab ye page Claude ke andar khula ho. Baaki jagah example messages ek recorded run se chalte hain.</p>
+    </div>
+
+    <div class="panel">
+      <h2>2. Automation ka run</h2>
+      <div class="steps" id="steps"></div>
+    </div>
+  </div>
+
+  <div class="panel sheet">
+    <h2>Lead sheet <span class="who">is session mein bani rows</span></h2>
+    <div class="tw"><table>
+      <thead><tr><th>Time</th><th>Name</th><th>Phone</th><th>Need</th><th>Budget ₹</th><th>Kab tak</th><th>Ready</th><th>Visit</th><th>Score</th><th>Class</th><th>Next action</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="11" class="empty">Abhi koi row nahi. Upar se automation chalao.</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <p class="foot"><b>Kya asli hai, kya nahi:</b> Message padhna, details nikalna aur reply likhna AI karta hai. Score ek fixed formula se banta hai (budget 25, kab tak 30, ready 20, visit/appointment 25). Claude ke andar "Asli mein bhejo" chalu ho to row asli Google Sheet mein jaati hai aur HOT par asli Gmail alert nikalta hai, tumhare apne Google account se. Ye tabhi chalta hai jab koi page chalaye. Bina page khole 24x7 chalne ke liye n8n workflow lagta hai.</p>
+</div>
+
+<script>
+const BIZ = {
+  realestate:{label:'Real estate',unit:'flat / plot',presets:[
+    {tag:'HOT',text:'Hi, mujhe Mau mein 2BHK chahiye, budget 55 lakh tak. Loan pre-approved hai. Isi mahine shift karna hai, kal shaam site visit ho sakta hai? Mera naam Demo Customer, 9000000000'},
+    {tag:'WARM',text:'2bhk ka rate kya hai? Shayad 6-7 mahine mein lene ka plan hai, abhi dekh raha hoon. Budget 50 lakh ke aaspaas.'},
+    {tag:'COLD',text:'Price list bhej do'}]},
+  clinic:{label:'Clinic',unit:'treatment',presets:[
+    {tag:'HOT',text:'Doctor sahab, mujhe daant mein bahut dard hai kal se. Aaj hi appointment chahiye, kitni fees hogi? Demo Customer, 9000000000'},
+    {tag:'WARM',text:'Braces lagwane hain beta ke liye. Kitna kharcha aayega? Agle mahine tak soch rahe hain.'},
+    {tag:'COLD',text:'timing kya hai'}]},
+  coaching:{label:'Coaching',unit:'course',presets:[
+    {tag:'HOT',text:'Sir, class 11 ke liye JEE batch ka admission lena hai. Fees 45,000 tak theek hai. Is hafte demo class attend kar sakte hain? Demo Customer, 9000000000'},
+    {tag:'WARM',text:'NEET ke liye batch kab start hoga? Fees kitni hai? Abhi 2 mahine baad dekhenge.'},
+    {tag:'COLD',text:'hello'}]},
+  salon:{label:'Salon',unit:'service',presets:[
+    {tag:'HOT',text:'Bridal makeup booking karni hai 20 tareekh ke liye. Budget 25 hazaar tak. Kal trial ke liye aa sakti hoon? Demo Customer, 9000000000'},
+    {tag:'WARM',text:'Hair spa ka rate batao. Is mahine ke end tak karwana hai shayad.'},
+    {tag:'COLD',text:'rates?'}]}
+};
+/* Recorded runs, used only when live AI is not available. */
+const CANNED = {
+  0:[{name:'Demo Customer',phone:'9000000000',need:'2BHK flat',budget_inr:5500000,days:30,ready:'yes',visit:true,reply:'Namaste Demo ji! 2BHK, 55 lakh ke budget mein hamare paas Mau mein 2 options hain. Kal shaam site visit pakka karte hain. Kaunsa time theek rahega, 5 baje ya 6 baje?'},
+     {name:'',phone:'',need:'2BHK flat',budget_inr:5000000,days:200,ready:'maybe',visit:false,reply:'Namaste! 50 lakh ke aaspaas 2BHK options hain. Aapka naam bata dein, main details WhatsApp par bhej deta hoon.'},
+     {name:'',phone:'',need:'',budget_inr:null,days:null,ready:'no',visit:false,reply:'Namaste! Price list bhej deta hoon. Aap kaunsa flat dekh rahe hain, 1BHK, 2BHK ya 3BHK?'}],
+  1:[{name:'Demo Customer',phone:'9000000000',need:'Dant dard, appointment',budget_inr:null,days:0,ready:'yes',visit:true,reply:'Demo ji, dard ke liye hum aaj hi dekh sakte hain. Aaj shaam 5 baje ka slot khali hai, book kar doon?'},
+     {name:'',phone:'',need:'Braces',budget_inr:null,days:30,ready:'maybe',visit:false,reply:'Braces ke liye pehle ek free consultation hota hai. Bachche ki umar bata dein, phir kharche ka andaaza de deta hoon.'},
+     {name:'',phone:'',need:'',budget_inr:null,days:null,ready:'no',visit:false,reply:'Clinic subah 10 se raat 8 baje tak khula hai. Kisi problem ke liye aana ho to bataiye.'}],
+  2:[{name:'Demo Customer',phone:'9000000000',need:'Class 11 JEE batch',budget_inr:45000,days:7,ready:'yes',visit:true,reply:'Demo ji, JEE batch ke liye demo class is hafte hai. Shanivaar ya Ravivaar, kaunsa din theek rahega?'},
+     {name:'',phone:'',need:'NEET batch',budget_inr:null,days:60,ready:'maybe',visit:false,reply:'NEET ka naya batch agle mahine shuru hota hai. Student kis class mein hai bata dein, fees ki detail bhej deta hoon.'},
+     {name:'',phone:'',need:'',budget_inr:null,days:null,ready:'no',visit:false,reply:'Namaste! Kaunsa course dekh rahe hain, JEE ya NEET?'}],
+  3:[{name:'Demo Customer',phone:'9000000000',need:'Bridal makeup',budget_inr:25000,days:20,ready:'yes',visit:true,reply:'Demo ji, congratulations! Kal trial ke liye aa jaiye. Dopahar 3 baje ka slot rakhoon?'},
+     {name:'',phone:'',need:'Hair spa',budget_inr:null,days:25,ready:'maybe',visit:false,reply:'Hair spa 1,200 rupaye se shuru hota hai. Is hafte kaunsa din suit karega?'},
+     {name:'',phone:'',need:'',budget_inr:null,days:null,ready:'no',visit:false,reply:'Namaste! Kaunsi service ka rate chahiye, haircut, spa ya makeup?'}]
+};
+const STEPS=[
+ ['Message mila','WhatsApp / website'],
+ ['AI ne padha','AI'],
+ ['Lead score hua','Formula'],
+ ['Sheet mein row bani','Google Sheets preview'],
+ ['Owner ko alert','Telegram preview'],
+ ['Customer ko reply','AI draft']];
+const $=id=>document.getElementById(id);
+let mcp=null, sample=null, bizKey='realestate', presetIdx=-1, running=false, rows=[];
+const bizSel=$('biz');
+Object.keys(BIZ).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=BIZ[k].label;bizSel.appendChild(o)});
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function drawPresets(){
+  const box=$('presets');box.innerHTML='';
+  BIZ[bizKey].presets.forEach((p,i)=>{
+    const b=document.createElement('button');b.className='chip';b.type='button';
+    const col=p.tag==='HOT'?'var(--hot)':p.tag==='WARM'?'var(--warm)':'var(--cold)';
+    b.innerHTML='<span class="dot" style="background:'+col+'"></span>'+p.tag+' lead';
+    b.onclick=()=>{$('msg').value=p.text;presetIdx=i};
+    box.appendChild(b);
+  });
+}
+function drawSteps(){
+  const box=$('steps');box.innerHTML='';
+  STEPS.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='step';d.id='s'+i;
+    d.innerHTML='<div class="ico">'+(i+1)+'</div><div><div class="st">'+s[0]+'<span class="who">'+s[1]+'</span></div><div class="body" id="b'+i+'">Intezaar...</div></div>';
+    box.appendChild(d);
+  });
+}
+function setStep(i,state,html){
+  const d=$('s'+i);d.className='step '+state;
+  if(html!=null)$('b'+i).innerHTML=html;
+  if(state==='done')d.querySelector('.ico').textContent='✓';
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+function fmtBudget(n){if(n==null)return '—';if(n>=10000000)return '₹'+(n/10000000).toFixed(2).replace(/\.?0+$/,'')+' cr';if(n>=100000)return '₹'+(n/100000).toFixed(1).replace(/\.0$/,'')+' lakh';return '₹'+n.toLocaleString('en-IN')}
+function fmtDays(d){if(d==null)return 'nahi bataya';if(d<=0)return 'aaj';if(d<=7)return d+' din';if(d<=60)return Math.round(d/30*10)/10+' mahina';return Math.round(d/30)+' mahine'}
+function score(x){
+  const p=[];let t=0;
+  if(x.budget_inr!=null){p.push(['Budget bataya',25]);t+=25}else p.push(['Budget nahi',0]);
+  if(x.days==null)p.push(['Kab tak: pata nahi',0]);
+  else if(x.days<=7){p.push(['Is hafte tak',30]);t+=30}
+  else if(x.days<=30){p.push(['Is mahine tak',20]);t+=20}
+  else{p.push(['Der se',10]);t+=10}
+  if(x.ready==='yes'){p.push(['Ready',20]);t+=20}else if(x.ready==='maybe'){p.push(['Soch raha',10]);t+=10}else p.push(['Ready nahi',0]);
+  if(x.visit){p.push(['Visit / appointment',25]);t+=25}else p.push(['Visit nahi',0]);
+  return {t,p,cls:t>=70?'HOT':t>=40?'WARM':'COLD'};
+}
+function parseJSON(txt){
+  const a=txt.indexOf('{'),b=txt.lastIndexOf('}');
+  if(a<0||b<a)throw new Error('AI ne sahi jawab nahi diya');
+  return JSON.parse(txt.slice(a,b+1));
+}
+async function liveExtract(message){
+  const b=BIZ[bizKey];
+  const prompt='You are the AI employee of a small Indian '+b.label.toLowerCase()+' business. A customer sent this message (Hindi, English or Hinglish):\n\n"""'+message+'"""\n\nReturn ONLY a JSON object, no other text, with keys:\n name (string, "" if unknown), phone (string, "" if unknown), need (short string in English, "" if unknown), budget_inr (number in rupees or null), days (number of days until they want to buy/book; 0 for today; null if unknown), ready ("yes" if clearly wants to proceed, "maybe" if exploring, "no" if just asking), visit (true if they ask for or agree to a visit, demo, trial or appointment), reply (a short, warm reply to the customer in the same language and script style as their message, max 2 sentences, answers what you can and asks for the single most useful missing detail or proposes a time). Never invent prices or facts about the business.';
+  const r=await sample(prompt,{cache:false,modelTier:'quick'});
+  const o=parseJSON(r.text||'');
+  return {name:String(o.name||''),phone:String(o.phone||''),need:String(o.need||''),budget_inr:typeof o.budget_inr==='number'?o.budget_inr:null,days:typeof o.days==='number'?o.days:null,ready:['yes','maybe','no'].includes(o.ready)?o.ready:'no',visit:!!o.visit,reply:String(o.reply||'')};
+}
+function nextAction(c,x){
+  if(c==='HOT')return 'Aaj hi call karo'+(x.visit?' aur visit confirm karo':'');
+  if(c==='WARM')return '2 din mein follow-up';
+  return 'Nurture list mein daalo';
+}
+async function runAutomation(){
+  if(running)return;
+  const message=$('msg').value.trim();
+  if(!message){$('msg').focus();return}
+  running=true;$('run').disabled=true;drawSteps();
+  const t0=new Date();
+  try{
+    setStep(0,'on');await wait(350);
+    setStep(0,'done','<div class="msg">'+esc(message)+'</div>');
+    setStep(1,'on','AI message padh raha hai...');
+    let x,live=false;
+    const preset=BIZ[bizKey].presets.findIndex(p=>p.text===message);
+    if(sample){
+      try{x=await liveExtract(message);live=true}
+      catch(e){
+        if(preset<0){throw e}
+      }
+    }
+    if(!x){
+      if(preset<0)throw new Error('Live AI sirf Claude ke andar chalta hai. Upar ka koi example message chuniye.');
+      x=Object.assign({},CANNED[Object.keys(BIZ).indexOf(bizKey)][preset]);
+      await wait(700);
+    }
+    setStep(1,'done','<dl class="kv"><dt>Naam</dt><dd>'+esc(x.name||'—')+'</dd><dt>Phone</dt><dd>'+esc(x.phone||'—')+'</dd><dt>Zaroorat</dt><dd>'+esc(x.need||'—')+'</dd><dt>Budget</dt><dd>'+fmtBudget(x.budget_inr)+'</dd><dt>Kab tak</dt><dd>'+fmtDays(x.days)+'</dd><dt>Ready</dt><dd>'+esc(x.ready)+'</dd><dt>Visit</dt><dd>'+(x.visit?'haan':'nahi')+'</dd></dl><div class="note" style="margin-top:6px">'+(live?'Live AI se nikala gaya':'Recorded run')+'</div>');
+    setStep(2,'on','Score ginn raha hai...');await wait(500);
+    const s=score(x);
+    setStep(2,'done','<div class="pts">'+s.p.map(a=>'<span class="pt">'+esc(a[0])+' +'+a[1]+'</span>').join('')+'</div><div style="margin-top:6px"><b style="font-variant-numeric:tabular-nums">'+s.t+'/100</b> <span class="cls '+s.cls+'">'+s.cls+'</span></div>');
+    setStep(3,'on','Row likh raha hai...');await wait(300);
+    const time=t0.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const row={time,name:x.name||'—',phone:x.phone||'—',need:x.need||'—',budget:fmtBudget(x.budget_inr),kab:fmtDays(x.days),ready:x.ready,visit:x.visit?'Yes':'No',score:s.t,cls:s.cls,next:nextAction(s.cls,x)};
+    rows.unshift(row);drawRows();
+    const wantReal=$('real').checked, to=$('alertTo').value.trim();
+    try{localStorage.setItem('alertTo',to)}catch(e){}
+    if(wantReal&&mcp){
+      try{
+        await mcp.callTool('Google Sheets','append_values',{spreadsheetId:SHEET_ID,range:'Sheet1!A1',values:[[time,row.name,row.phone,row.need,row.budget,row.kab,row.ready,row.visit,row.score,row.cls,row.next,message]]});
+        setStep(3,'done','<span class="ok">Asli Google Sheet mein row jud gayi.</span> <a href="'+SHEET_URL+'" target="_blank" rel="noopener">Sheet kholo</a>');
+      }catch(e){setStep(3,'done','<div class="err">'+esc(mcpMsg(e,'Google Sheets'))+'</div>Row neeche table mein dikh rahi hai.')}
+    }else{
+      setStep(3,'done','Preview: row neeche table mein hai. Asli Sheet ke liye "Asli mein bhejo" chalu rakho aur page Claude mein kholo.');
+    }
+    setStep(4,'on','Alert soch raha hai...');await wait(300);
+    if(s.cls==='HOT'){
+      const txt='🔥 HOT lead ('+s.t+'/100)\n'+(x.name||'Naam nahi')+(x.phone?' · '+x.phone:'')+'\n'+(x.need||'')+(x.budget_inr!=null?' · '+fmtBudget(x.budget_inr):'')+'\nKab tak: '+fmtDays(x.days)+'\nAction: '+row.next+'\n\nCustomer ka message:\n'+message;
+      let note='';
+      if(wantReal&&mcp&&/^\S+@\S+\.\S+$/.test(to)){
+        try{
+          const res=await mcp.callTool('Gmail','send_message',{to:[to],subject:'🔥 HOT lead ('+s.t+'/100): '+(x.name||'naya customer'),body:txt});
+          const pl=res&&res.payload,mid=pl&&typeof pl==='object'?(pl.id||''):'';
+          note='<span class="ok">Gmail ne email accept kar li'+(mid?' (id '+esc(mid)+')':'')+'. Jisko bheja: <b>'+esc(to)+'</b>. Wahan Inbox aur Spam dono dekho.</span>';
+        }catch(e){note='<div class="err">'+esc(mcpMsg(e,'Gmail'))+'</div>'}
+      }else if(wantReal&&mcp){note='<div class="note">Gmail alert nahi gaya, kyunki alert email ka box khaali hai ya galat hai. Ye preview hai.</div>'}
+      else note='<div class="note">Preview. Asli alert ke liye page Claude mein kholo.</div>';
+      setStep(4,'done','<div class="msg alert">'+esc(txt)+'</div>'+note);
+    }else{
+      setStep(4,'done','Alert nahi gaya. Sirf HOT leads par owner ko ping jaata hai, taaki wo spam na samjhe.');
+    }
+    setStep(5,'on','Reply likh raha hai...');await wait(400);
+    setStep(5,'done','<div class="msg out">'+esc(x.reply||'—')+'</div>');
+  }catch(e){
+    const open=document.querySelector('.step.on');
+    if(open){open.className='step';$('b'+open.id.slice(1)).innerHTML='<div class="err">'+esc(e.message||'Kuch gadbad hui. Dobara try karo.')+'</div>'}
+  }
+  running=false;$('run').disabled=false;
+}
+const SHEET_ID='YOUR_GOOGLE_SHEET_ID'; /* paste your own Google Sheet id */
+const SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
+function mcpMsg(e,name){
+  const c=e&&e.code;
+  if(c==='needs_reauth')return name+' ka login khatam ho gaya. claude.ai Settings > Connectors mein '+name+' dobara connect karo.';
+  if(c==='server_not_connected'||c==='selection_required')return name+' connector add nahi hai. claude.ai Settings > Connectors mein '+name+' add karo.';
+  if(c==='not_in_manifest'||c==='approval_required'||c==='consent_required')return name+' ki ijazat nahi mili. Page dobara kholo aur Allow dabao.';
+  if(c==='tool_error')return name+' ne error diya: '+((e&&e.message)||'access check karo (Sheet tumhare account ki honi chahiye).');
+  if(c==='server_unavailable'||c==='upstream_error')return name+' abhi jawab nahi de raha. Thodi der baad dobara chalao.';
+  return name+' mein dikkat aayi. Dobara try karo.';
+}
+function drawRows(){
+  const tb=$('rows');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="11" class="empty">Abhi koi row nahi. Upar se automation chalao.</td></tr>';return}
+  tb.innerHTML=rows.map(r=>'<tr><td>'+esc(r.time)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.need)+'</td><td class="n">'+esc(r.budget)+'</td><td>'+esc(r.kab)+'</td><td>'+esc(r.ready)+'</td><td>'+esc(r.visit)+'</td><td class="n">'+r.score+'</td><td><span class="cls '+r.cls+'" style="margin:0">'+r.cls+'</span></td><td>'+esc(r.next)+'</td></tr>').join('');
+}
+bizSel.onchange=()=>{bizKey=bizSel.value;$('msg').value=BIZ[bizKey].presets[0].text;drawPresets()};
+$('run').onclick=runAutomation;
+drawSteps();drawPresets();$('msg').value=BIZ[bizKey].presets[0].text;
+(async()=>{
+  try{sample=await window.claude.use('sample')}catch(e){sample=null}
+  try{mcp=await window.claude.use('mcp')}catch(e){mcp=null}
+  try{const v=localStorage.getItem('alertTo');if(v)$('alertTo').value=v}catch(e){}
+  document.querySelector('.live').hidden=!mcp;
+  $('sheetLink').innerHTML=mcp?'Rows <a href="'+SHEET_URL+'" target="_blank" rel="noopener">AI Employee Leads</a> sheet mein jaati hain.':'';
+  $('mode').textContent=sample?'Live AI chalu hai. Koi bhi apna message likh ke try karo.':'Live AI yahan available nahi. Example messages ek recorded run se chalte hain.';
+})();
+</script>
