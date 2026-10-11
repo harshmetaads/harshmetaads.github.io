@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#03050d">
+<title>AI Employee for SMBs | Harsh Pratap Singh</title>
+<meta name="description" content="A prototype concept for AI-powered lead intake, qualification, CRM updates, and sales follow-up automation for small businesses.">
+<link rel="canonical" href="https://harshmetaads.github.io/ai-employee.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#03050d;--panel:rgba(7,12,30,.78);--fg:#eef3ff;--muted:#9aa8cc;--blue:#2f7dff;--cyan:#4fd1ff;--line:rgba(100,160,255,.2);--green:#63e6a5;--yellow:#ffd60a;--display:"Plus Jakarta Sans",system-ui,sans-serif;--body:"Manrope",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 75% 5%,rgba(47,125,255,.17),transparent 40%),radial-gradient(ellipse at 5% 45%,rgba(79,209,255,.07),transparent 36%),var(--bg);color:var(--fg);font:16px/1.65 var(--body);min-height:100vh;padding:24px clamp(18px,5vw,64px) 60px}
+a{color:inherit;text-decoration:none}.wrap{max-width:1080px;margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:8px 0 28px;border-bottom:1px solid var(--line)}.brand{font:700 .95rem var(--display)}.back{color:var(--muted);font-size:.9rem}.back:hover{color:var(--cyan)}
+.eyebrow{font:500 .74rem var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}h1,h2,h3{font-family:var(--display);line-height:1.12;letter-spacing:-.035em}h1{font-size:clamp(2.4rem,6vw,4.6rem);max-width:850px;margin:16px 0}h2{font-size:clamp(1.6rem,3vw,2.2rem);margin:0 0 14px}h3{font-size:1.12rem;margin:10px 0}.grad{background:linear-gradient(95deg,#2f7dff,#5cb4ff,#8fe3ff);color:transparent;background-clip:text}.lede{max-width:720px;color:var(--muted);font-size:1.08rem}.hero{padding:clamp(48px,8vw,90px) 0 38px}.tags{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}.tags span{border:1px solid var(--line);border-radius:999px;padding:6px 11px;color:#b9d7ff;font-size:.78rem;background:rgba(7,12,30,.6)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:28px 0 54px}.card{border:1px solid var(--line);border-radius:20px;background:var(--panel);backdrop-filter:blur(14px);padding:24px;box-shadow:0 24px 70px -50px rgba(47,125,255,.8)}.card p{color:var(--muted);margin-bottom:0}.num{font:500 .72rem var(--mono);color:var(--cyan)}.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:24px 0 54px}.flowstep{border:1px solid var(--line);border-radius:14px;padding:15px 12px;background:rgba(7,12,30,.7);min-height:130px}.flowstep b{display:block;font:700 .85rem var(--display);margin:8px 0}.flowstep small{display:block;color:var(--muted);font-size:.75rem}.icon{color:var(--cyan);font-size:1.2rem}
+.demo{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:22px;align-items:start;margin:22px 0 50px}.demo label{display:block;font-size:.84rem;color:#c8d4f1;margin:15px 0 6px}.demo input,.demo select{width:100%;background:#050a18;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}.btn{border:0;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:linear-gradient(120deg,#2a6dff,#4aa0ff);color:#fff;font:700 .9rem var(--body);padding:13px 20px;cursor:pointer;margin-top:18px}.btn:hover{filter:brightness(1.12)}.result{min-height:100%;}.result-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.badge{font:500 .72rem var(--mono);padding:6px 10px;border-radius:999px;background:rgba(154,168,204,.12);color:var(--muted);border:1px solid var(--line)}.badge.hot{color:#ff9a9a;border-color:rgba(255,100,100,.4);background:rgba(255,80,80,.1)}.badge.warm{color:#ffd878;border-color:rgba(255,214,10,.35);background:rgba(255,214,10,.08)}.badge.cold{color:#9aa8cc}.result p{color:var(--muted)}.result-list{padding-left:18px;color:var(--muted)}.notice{border-left:3px solid var(--yellow);padding:12px 16px;background:rgba(255,214,10,.06);border-radius:0 10px 10px 0;color:#c8d4f1;font-size:.85rem}.links{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}.link{border:1px solid var(--line);padding:10px 14px;border-radius:999px;color:#c8d4f1;font-size:.88rem}.link:hover{border-color:var(--cyan)}footer{padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.demo{grid-template-columns:1fr}.flowstep{min-height:0}.nav{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body><div class="wrap">
+<nav class="nav"><a class="brand" href="/">HARSH PRATAP SINGH <span class="grad">/ PROJECTS</span></a><a class="back" href="/">← Back to portfolio</a></nav>
+<header class="hero">
+<p class="eyebrow">Featured project · AI automation</p>
+<h1>AI Employee <span class="grad">for SMBs</span></h1>
+<p class="lede">A practical automation concept that helps small businesses respond to enquiries more consistently—capturing leads, qualifying intent, organizing the CRM, and prompting the sales team to follow up.</p>
+<div class="tags"><span>n8n workflows</span><span>Google Sheets CRM</span><span>Lead scoring</span><span>Email alerts</span><span>Follow-up reminders</span></div>
+<div class="notice">Prototype showcase: the interactive panel below is a local example of lead scoring. It does not send messages, write to a live CRM, or represent production customer results.</div>
+</header>
+<section><p class="eyebrow">Workflow overview</p><h2>From enquiry to next action</h2><div class="flow">
+<div class="flowstep"><span class="num">01 / INTAKE</span><b>Capture enquiry</b><small>Receive customer details from a form or webhook.</small></div>
+<div class="flowstep"><span class="num">02 / QUALIFY</span><b>Understand intent</b><small>Review requirement, budget, and readiness.</small></div>
+<div class="flowstep"><span class="num">03 / SCORE</span><b>Prioritize lead</b><small>Classify as HOT, WARM, or COLD.</small></div>
+<div class="flowstep"><span class="num">04 / ORGANIZE</span><b>Update CRM</b><small>Store structured lead data in Google Sheets.</small></div>
+<div class="flowstep"><span class="num">05 / FOLLOW UP</span><b>Notify the team</b><small>Trigger sales alerts and reminder workflows.</small></div>
+</div></section>
+<section><p class="eyebrow">Interactive concept</p><h2>Try the lead qualification logic</h2><p class="lede">Enter sample lead details to see an illustrative priority label and suggested next action.</p>
+<div class="demo">
+<form class="card" id="leadForm"><span class="num">SAMPLE LEAD INPUT</span>
+<label for="name">Lead name</label><input id="name" value="Alex Morgan" required>
+<label for="requirement">What are they looking for?</label><select id="requirement"><option value="clear">Clear requirement / asks for a quote</option><option value="research">Comparing options / researching</option><option value="unclear">Unclear or very early enquiry</option></select>
+<label for="budget">Budget readiness</label><select id="budget"><option value="ready">Budget confirmed</option><option value="maybe">Budget not confirmed</option><option value="none">No budget shared</option></select>
+<label for="timing">Purchase timeline</label><select id="timing"><option value="now">Ready soon (0–14 days)</option><option value="later">Within 30–90 days</option><option value="unknown">Not sure yet</option></select>
+<button class="btn" type="submit">Qualify sample lead <span aria-hidden="true">↗</span></button></form>
+<div class="card result" id="result" aria-live="polite"><div class="result-top"><span class="num">SAMPLE OUTPUT</span><span class="badge hot" id="status">HOT</span></div><h3 id="resultTitle">Prioritize personal follow-up</h3><p id="summary">Alex Morgan has a clear requirement, a confirmed budget, and a near-term timeline.</p><ul class="result-list" id="actions"><li>Create or update the CRM row</li><li>Notify the sales owner</li><li>Schedule a prompt follow-up</li></ul></div>
+</div></section>
+<section><p class="eyebrow">Project scope</p><h2>Built around useful business actions</h2><div class="grid">
+<article class="card"><span class="num">CAPTURE</span><h3>Structured lead intake</h3><p>Collect customer details and normalize them into consistent fields before routing.</p></article>
+<article class="card"><span class="num">PRIORITIZE</span><h3>HOT / WARM / COLD routing</h3><p>Use simple qualification signals to help salespeople decide which enquiry needs attention first.</p></article>
+<article class="card"><span class="num">RECORD</span><h3>Google Sheets CRM</h3><p>Keep lead information, status, summaries, and follow-up dates in a shared working sheet.</p></article>
+<article class="card"><span class="num">FOLLOW THROUGH</span><h3>Alerts and reminders</h3><p>Notify the team about priority leads and support repeatable follow-up routines.</p></article>
+</div></section>
+<section><p class="eyebrow">Next step</p><h2>A prototype toward an AI employee</h2><p class="lede">The goal is to connect enquiry handling with real operational actions—not just answer questions in a chat window. The current scope focuses on the lead intake and follow-up workflow, with further integrations and reliability checks needed before production use.</p><div class="links"><a class="link" href="https://github.com/harshmetaads/ai-employee---smbs" target="_blank" rel="noopener">Project repository ↗</a><a class="link" href="mailto:harshbusinesshub@gmail.com?subject=AI%20Employee%20project">Discuss this project ↗</a><a class="link" href="/">Return to portfolio ↗</a></div></section>
+<footer><p>Designed and developed as a project showcase by Harsh Pratap Singh. No client outcomes or production performance are claimed.</p></footer>
+</div>
+<script>
+const form=document.getElementById('leadForm');
+form.addEventListener('submit',function(e){e.preventDefault();const name=document.getElementById('name').value.trim()||'This lead';const req=document.getElementById('requirement').value;const budget=document.getElementById('budget').value;const timing=document.getElementById('timing').value;let score=0;if(req==='clear')score+=2;else if(req==='research')score+=1;if(budget==='ready')score+=2;else if(budget==='maybe')score+=1;if(timing==='now')score+=2;else if(timing==='later')score+=1;let status,title,summary,actions;if(score>=5){status='HOT';title='Prioritize personal follow-up';summary=name+' shows strong buying signals and may need a timely sales conversation.';actions=['Create or update the CRM row','Notify the sales owner','Schedule a prompt follow-up'];}else if(score>=3){status='WARM';title='Nurture and clarify';summary=name+' has some buying signals; confirm the missing details and set a follow-up date.';actions=['Save details to the CRM','Ask a qualifying question','Set a follow-up reminder'];}else{status='COLD';title='Keep organized for later';summary=name+' is still early or missing key information; use a light-touch next step.';actions=['Record the enquiry','Share relevant information','Review again when intent changes'];}const badge=document.getElementById('status');badge.textContent=status;badge.className='badge '+status.toLowerCase();document.getElementById('resultTitle').textContent=title;document.getElementById('summary').textContent=summary;const list=document.getElementById('actions');list.replaceChildren(...actions.map(x=>{const li=document.createElement('li');li.textContent=x;return li;}));});
+</script>
+</body></html>
