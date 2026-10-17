@@ -1,0 +1,53 @@
+# Base44 sandbox run config for this repo.
+#
+# This project is a static website (HTML/CSS/JS, Three.js background) with no
+# build step, so the "dev server" is nginx serving the bind-mounted repo source
+# directly: a file saved in the sandbox is what the next request returns.
+#
+# Run:  docker compose -f docker-compose.base44.yml up -d
+# Web:  http://localhost:3000
+
+services:
+  web:
+    image: nginx:alpine
+    restart: on-failure
+    ports:
+      - "3000:80"
+    environment:
+      # Passed through from the platform (set to 1 in the sandbox only). The
+      # command below compares it to "1" and does nothing when it is unset.
+      - BASE44_PREVIEW_MODE
+    volumes:
+      # The repo IS the document root - no image rebuild needed for edits.
+      - .:/usr/share/nginx/html:ro
+      - ./nginx.base44.conf:/etc/nginx/conf.d/default.conf:ro
+      # The sandbox working copy is root-owned 0700, so the stock unprivileged
+      # worker user cannot read it (403 on every request). Run workers as root here.
+      - ./nginx.base44.main.conf:/etc/nginx/nginx.conf:ro
+      # Preview-only CSP override, activated by the command below. The repo's own
+      # files keep their strict inline CSP; see AGENTS.md.
+      - ./nginx.base44.preview.conf:/etc/nginx/base44-preview.conf:ro
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        if [ "$BASE44_PREVIEW_MODE" = "1" ]; then
+          cp /etc/nginx/base44-preview.conf /etc/nginx/conf.d/50-base44-preview.conf
+          echo "base44: BASE44_PREVIEW_MODE=1 -> preview CSP override active" >&2
+        else
+          rm -f /etc/nginx/conf.d/50-base44-preview.conf
+          echo "base44: BASE44_PREVIEW_MODE not '1' -> serving the repo CSP unchanged" >&2
+        fi
+        exec nginx -g 'daemon off;'
+    healthcheck:
+      # Probe the real entry point and a versioned asset, not just the port.
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- http://127.0.0.1/ >/dev/null
+          && wget -qO- http://127.0.0.1/assets/luxury.js >/dev/null
+          || { echo "web healthcheck failed (page or asset)"; exit 1; }
+      interval: 10s
+      timeout: 4s
+      retries: 5
+      start_period: 5s
